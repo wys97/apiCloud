@@ -1,0 +1,37 @@
+<widget id="A6025238071881" version="0.0.1">
+    <name>航旅分期</name>
+    <description>
+        航旅分期
+    </description>
+    <author email="developer@wallet.hnair.com" href="http://wallet.hnair.com">
+        Developer
+    </author>
+    <content src="index.html"/>
+    <access origin="*"/>
+    <preference name="appCertificateVerify" value="false" />
+    <preference name="pageBounce" value="false"/>
+    <preference name="appBackground" value="rgba(0,0,0,0.0)"/>
+    <preference name="windowBackground" value="rgba(0,0,0,0.0)"/>
+    <preference name="frameBackgroundColor" value="rgba(0,0,0,0.0)"/>
+    <preference name="hScrollBarEnabled" value="false"/>
+    <preference name="vScrollBarEnabled" value="false"/>
+    <preference name="autoLaunch" value="true"/>
+    <preference name="fullScreen" value="false"/>
+    <preference name="autoUpdate" value="true"/>
+    <preference name="smartUpdate" value="false"/>
+    <preference name="debug" value="false"/>
+    <preference name="statusBarAppearance" value="true"/>
+    <preference name="urlScheme" value="hnairwallet"/>
+    <preference name="userAgent" value="InApp"/>
+
+    <permission name="readPhoneState"/>
+    <permission name="camera"/>
+    <permission name="location"/>
+    <permission name="fileSystem"/>
+    <permission name="internet"/>
+    <feature name="ajpush">
+        <param name="app_key" value="5aa82d9f61cdcd57fa9d1bbd" />
+        <param name="channel" value="your channel" />
+    </feature>
+
+</widget>

@@ -1,0 +1,312 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+        content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,initial-scale=1.0,width=device-width" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>航旅分期</title>
+    <link rel="stylesheet" type="text/css" href="./css/api.css" />
+    <style type="text/css">
+        html,
+        body {
+            height: 100%;
+        }
+
+        .wrap {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-flex-flow: column;
+        }
+
+        header {
+            height: 0px;
+            width: 100%;
+            text-align: center;
+            background-color: #fff;
+            color: #000;
+            line-height: 45px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header-left,
+        .header-title,
+        .header-right {
+            flex: 1 1;
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+
+        .header-left {
+            padding-left: 15px;
+            font-size: 16px;
+        }
+
+        .header-btn {
+            margin-right: 25px;
+            display: inherit;
+        }
+
+        .header-title {
+            justify-content: center;
+            font-size: 18px;
+            white-space: nowrap;
+        }
+
+        .header-right {
+            justify-content: flex-end;
+            font-size: 16px;
+            margin-right: 15px;
+        }
+
+        .icon {
+            width: 16px;
+            height: 16px
+        }
+
+        */
+    </style>
+</head>
+
+<body style="background: white;">
+
+</body>
+
+<script type="text/javascript" src="./script/api.js"></script>
+<script type="text/javascript">
+    apiready = function () {
+
+         api.getPrefs({
+            key: 'isNeedWelcome22'
+        }, function (ret, err) {
+            if (ret.value === '') {
+                fnShowWelcome();
+                api.setPrefs({
+                    key: 'isNeedWelcome22',
+                    value: true
+                })
+            } else {
+
+            }
+        })
+
+        //顶部状态栏
+        api.setStatusBarStyle({
+            style: 'dark',
+            color: 'rgba(255,255,255,0.1)'
+        });
+
+        $api.fixStatusBar($api.dom('header'));
+
+        // 打开传进入来的外部地址
+        var link = api.pageParam.link;
+        api.openFrame({
+            name: 'home',
+            // url: 'http://10.188.0.153:3000/',   //联调环境
+            url: './html/index.html',   //打包环境
+            rect: {
+                marginTop: api.safeArea.top,
+                marginBottom: api.safeArea.bottom
+            },
+            progress: {
+                type: 'page',
+                color: 'rgb(250, 111, 49)',
+                height: 2
+            },
+            useWKWebView: true,
+            historyGestureEnabled: true
+        });
+
+        // 监听 frame title 变化, 并放到 header
+        var headerTitle = $api.dom('header .header-title');
+        api.setFrameClient({
+            frameName: 'main'
+        }, function (ret, err) {
+            if (ret.state == 3) {
+                $api.html(headerTitle, ret.title.length >= 7 ? ret.title.substring(0, 7) + '...' : ret.title);
+            }
+        });
+
+        // 导航后退
+        $api.addEvt($api.dom('header .header-btn-back'), 'click', function () {
+            historyBack();
+        });
+
+        // 导航关闭
+        $api.addEvt($api.dom('header .header-btn-close'), 'click', function () {
+            api.closeWin();
+        });
+
+        // 部分安卓手机点击手机默认后退键提示是否退出应用
+        api.addEventListener({
+            name: 'keyback'
+        }, function (ret, err) {
+            var frames = api.frames();
+            // alert(JSON.stringify(frames));
+            // console.log(JSON.stringify(frames))
+            if (frames[frames.length - 1].name === "home" || frames[frames.length - 1].name === "userInfo") {
+                api.historyBack({
+                    //  frameName: frames.length-1].name
+                }, function (ret, err) {
+                    if (!ret.status) {
+                        api.closeWin();
+                    }
+                });
+            } else if (frames[frames.length - 1].name === "h5") {
+                api.historyBack({
+                    frameName: "h5"
+                }, function (ret, err) {
+                    if (!ret.status) {
+                        api.closeWin();
+                    }
+                });
+            } else {
+                api.historyBack({
+                    //  frameName: frames.length-1].name
+                }, function (ret, err) {
+                    if (!ret.status) {
+                        api.closeFrame({
+                            name: frames[frames.length - 1].name
+                        });
+                    }
+                });
+            }
+        });
+
+        //消息推送初始化
+        var jpush = api.require('ajpush');
+        api.addEventListener({
+            name: 'appintent'
+        }, function (ret, err) {
+            if (ret && ret.appParam.ajpush) {
+            }
+        })
+        //两个监听事件
+        api.addEventListener({
+            name: 'pause'
+        }, function (ret, err) {
+            onPause();
+            //监听应用进入后台，通知jpush暂停事件
+        })
+        api.addEventListener({
+            name: 'resume'
+        }, function (ret, err) {
+            onResume();
+            setBadge()
+            //监听应用恢复到前台，通知jpush恢复事件
+        })
+
+        jpush.init(function (ret) {
+            if (ret && ret.status) { }
+        });
+
+        //安卓通知栏消息被点击
+        api.addEventListener({
+            name: 'appintent'
+        }, function (ret, err) {
+            if (ret && ret.appParam.ajpush) {
+                clickNotice()
+            }
+        });
+
+        //ios 通知栏消息点击
+        api.addEventListener({
+            name: 'noticeclicked'
+        }, function (ret, err) {
+            if (ret && ret.value) {
+                clickNotice()
+            }
+        })
+
+        function clickNotice() {
+            setBadge()
+            openMain()
+            api.execScript({
+                name: 'main',
+                script: 'fnSetselectde(2);'
+            });
+        }
+
+        //设置应用图标右上角数字，只iOS有效。
+        function setBadge() {
+            jpush.setBadge({
+                badge: 0
+            });
+        }
+
+        jpush.setListener(
+            function (ret) {
+                clickNotice()
+            }
+        );
+
+
+        //欢迎页
+        var WelcomePage = window.api.require('welcomePage');
+        WelcomePage.openWelcomePage({
+            isFullscreen: false, //是否全屏(全屏不显示状态栏)  默认false
+            AnimationType: 'ZoomOutPage', //动画类型   'Default默认', 'DepthPage深入浅出', 'Cube立方体', 'Rotate旋转','Accordion左右折叠',
+            //'InRightUp右上角进入' , 'InRightDown右下角进入', 'ZoomOutPage淡入淡出'
+            imgs: ['widget://image/welcome1.png', 'widget://image/welcome2.png', 'widget://image/welcome3.png'],
+            setting: {
+                isShow: true, // 是否显示页面点 默认不显示
+                SelectedImg: 'widget://image/SelectedImg.png',
+                NotSelectedImg: 'widget://image/NotSelectedImg.png',
+                ImgSize: 30, // 图片size
+                ImgSpacing: 30 // 图片之间的间隔
+            }
+        }, function (ret, err) {
+            if (ret) {
+                //重置欢迎页
+                // var WelcomePage = window.api.require('welcomePage');
+                // WelcomePage.setWelcome({
+                //   setWelcome: false
+                // },
+                // )
+
+            } else {
+
+            }
+        }
+        );
+
+        function fnShowWelcome() {
+
+            api.openFrameGroup({
+                name: 'welcomeGroup',
+                scrollEnable: true,
+                ract: {
+                    x: 0,
+                    y: 0,
+                    w: 'auto',
+                    h: 'auto'
+                },
+                index: 0,
+                preload: 4,
+                frames: [{
+                    name: 'welcome1',
+                    url: './welcome1.html',
+                    bounces: false
+                }, {
+                    name: 'welcome2',
+                    url: './welcome2.html',
+                    bounces: false
+                }, {
+                    name: 'welcome3',
+                    url: './welcome3.html',
+                    bounces: false
+                }]
+            }, function (ret, err) {
+                var name = ret.name;
+                var index = ret.index;
+            })
+        };
+    }
+</script>
+
+
+</html>

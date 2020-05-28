@@ -1,0 +1,1 @@
+海航钱包APP (仓库名必须和 apicloud 项目名一致, apicloud 项目名不能有符号, 见文档 https://docs.apicloud.com/Dev-Guide/Git-APICloud-guide)

@@ -1,0 +1,113 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,initial-scale=1.0,width=device-width" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>航旅分期</title>
+    <link rel="stylesheet" type="text/css" href="./css/api.css" />
+    <style type="text/css">
+        html,
+        body {}
+    </style>
+</head>
+
+<body>
+</body>
+<script type="text/javascript" src="./script/api.js"></script>
+<script type="text/javascript">
+    apiready = function() {
+        var fNPhotograph = api.require('FNPhotograph');
+
+        fNPhotograph.openCameraView({
+            fixedOn: api.pageParam.name,
+            rect: {
+                x: 0,
+                y: 45,
+                w: api.frameWidth,
+                h: api.frameHeight
+            },
+        }, function(ret) {
+            if (ret.status) {
+                api.openFrame({
+                    name: 'idcardContent',
+                    url: 'widget://idcard-content.html',
+                    pageParam: {
+                        name: api.pageParam.name
+                    },
+                    rect: {
+                        x: 0, //左上角x坐标
+                        y: 0, //左上角y坐标
+                        w: 'auto', //宽度，若传'auto'，页面从x位置开始自动充满父页面宽度
+                        h: 'auto', //高度，若传'auto'，页面从y位置开始自动充满父页面高度
+                    }
+                });
+            }
+        });
+
+
+        api.addEventListener({
+            name: 'takephoto'
+        }, function(ret, err) {
+            var fNPhotograph = api.require('FNPhotograph');
+            fNPhotograph.takePhoto({
+                path: 'fs://',
+                album: true,
+                qualityValue: 100
+            }, function(ret) {
+                alert(JSON.stringify(ret));
+
+                api.getPicture({
+                    destinationType: 'base64',
+                    sourceType: 'camera'
+                }, function(ret, err) {
+                    if (ret) {
+                        alert(JSON.stringify(ret));
+                    } else {
+                        alert(JSON.stringify(err));
+                    }
+                })
+
+                api.closeFrame({
+                    name: 'idcardContent'
+                });
+
+                api.closeFrame({
+                    name: api.pageParam.name
+                });
+            });
+        });
+    }
+
+    function takePhoto() {
+        var fNPhotograph = api.require('FNPhotograph');
+        fNPhotograph.takePhoto({
+            path: 'fs://',
+            album: true,
+            qualityValue: 100
+        }, function(ret) {
+            alert(JSON.stringify(ret));
+            api.getPicture({
+                destinationType: 'base64',
+                sourceType: 'camera'
+            }, function(ret, err) {
+                if (ret) {
+                    alert(JSON.stringify(ret));
+                } else {
+                    alert(JSON.stringify(err));
+                }
+            })
+
+            api.closeFrame({
+                name: 'idcardContent'
+            });
+
+            api.closeFrame({
+                name: api.pageParam.name
+            });
+        })
+    }
+</script>
+
+</html>

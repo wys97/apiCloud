@@ -1,0 +1,203 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,initial-scale=1.0,width=device-width" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>航旅分期</title>
+    <link rel="stylesheet" type="text/css" href="./css/api.css" />
+    <style type="text/css">
+        html,
+        body {
+            background-color: inherit;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .wrap {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-flex-flow: column;
+        }
+
+        header {
+            margin: 0 !important;
+            width: 100%;
+            height: 45px;
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.82);
+            color: #000;
+            line-height: 45px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            border: 1px solid #EFEFEF;
+        }
+
+        .header-left,
+        .header-title,
+        .header-right {
+            height: 45px !important;
+            flex: 1 1;
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+
+        .header-left {
+            padding-left: 15px;
+            font-size: 16px;
+        }
+
+        .header-btn {
+            margin-right: 25px;
+        }
+
+        .header-title {
+            justify-content: center;
+            font-size: 18px;
+            color: #444D54;
+            white-space: nowrap;
+        }
+
+        .header-right {
+            justify-content: flex-end;
+            font-size: 16px;
+        }
+
+        .icon {
+            height: 16px
+        }
+
+        .idcard-content {
+            min-height: calc(100vh - 45px);
+        }
+
+        .idcard-mask {
+            background-color: rgba(0, 0, 0, 0.92);
+        }
+
+        .mask-top {
+            height: 14.4vh;
+        }
+
+        .idcard {
+            height: 48vw;
+            display: flex;
+        }
+
+        .mask-left {
+            flex: 0 0 11.2%;
+        }
+
+        .idcard-border {
+            flex: 0 0 77.6%;
+            background: url('./image/idcard_border.png') center center / 100% 100% no-repeat;
+        }
+
+        .mask-bottom {
+            padding: 6.2vh 0 29.2vh;
+            /* calc(58.6vh - 45px); */
+            text-align: center;
+            color: #FFFFFF;
+            font-size: 14px;
+        }
+
+        .take-photo-btn {
+            background-color: #E1514C;
+            border-radius: 22px 0 22px 0;
+            height: 44px;
+            margin: 0 auto;
+            width: 85.1vw;
+            text-align: center;
+            font-size: 17px;
+            line-height: 44px;
+            color: #FFFFFF;
+        }
+
+        .mask-end {
+            height: 100vh;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="header-left">
+            <span id="leftBtn" class="header-btn header-btn-back"><img class="icon" src="./image/back.png"/></span>
+        </div>
+        <div class="header-title">扫描身份证</div>
+        <div class="header-right"><span id="rightBtn" class="header-btn header-btn-close"></span></div>
+    </header>
+    <div class="idcard-content">
+        <div class="idcard-mask mask-top">
+        </div>
+        <div class="idcard">
+            <div class="idcard-mask mask-left"></div>
+            <div class="idcard-border"></div>
+            <div class="idcard-mask mask-left"></div>
+        </div>
+        <div class="idcard-mask mask-bottom">
+            请将身份证正面放入扫描框内
+        </div>
+        <div class="idcard-mask take-photo">
+            <div class="take-photo-btn">
+                拍照
+            </div>
+        </div>
+        <div class="idcard-mask mask-end"></div>
+    </div>
+</body>
+<script type="text/javascript" src="./script/api.js"></script>
+<script type="text/javascript">
+    apiready = function() {
+        api.setStatusBarStyle({
+            style: 'dark',
+            color: '#fff'
+        });
+        $api.fixStatusBar($api.dom('header'));
+
+        // 导航后退
+        $api.addEvt($api.dom('header .header-btn-back'), 'click', function() {
+            historyBack();
+        });
+
+        // 导航关闭
+        $api.addEvt($api.dom('header .header-btn-close'), 'click', function() {
+            api.closeWin();
+        });
+
+        // 拍照按钮
+        $api.addEvt($api.dom('.idcard-content .take-photo-btn'), 'click', function() {
+            api.sendEvent({
+                name: 'takephoto'
+            });
+            api.execScript({
+                frameName: api.pageParam.name,
+                script: 'takePhoto();'
+            });
+
+        });
+
+        // 部分安卓手机点击手机默认后退键提示是否退出应用
+        api.addEventListener({
+            name: 'keyback'
+        }, function(ret, err) {
+            historyBack();
+        });
+
+        // 后退
+        function historyBack() {
+            api.historyBack({
+                frameName: 'h5'
+            }, function(ret, err) {
+                if (!ret.status) {
+                    api.closeWin();
+                }
+            });
+        }
+    };
+</script>
+
+</html>
